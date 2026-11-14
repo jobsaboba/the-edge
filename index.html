@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The Edge">
+<title>The Edge</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  :root{
+    --bg:#0b1220; --panel:#141d2f; --panel2:#0f172a; --line:#24334d;
+    --ink:#e7eef9; --dim:#8ea3bf; --steel:#7ea9cf; --steel2:#a8c8e4; --grey:#9aa8ba;
+    --em:#34d399;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0; padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--ink); padding:12px 12px 130px; max-width:440px; margin:0 auto;
+  }
+  header{display:flex; justify-content:space-between; align-items:center; padding:6px 2px 10px}
+  .brand{font-weight:900; font-size:1.05rem; letter-spacing:.3px}
+  .brand span{color:var(--steel)}
+  .datechip{font-size:.72rem; color:var(--dim); text-transform:uppercase; letter-spacing:1px}
+  .topbtns{display:flex; gap:6px}
+  .iconbtn{background:var(--panel); border:1px solid var(--line); color:var(--dim); border-radius:10px; padding:7px 9px; font-size:.9rem; cursor:pointer}
+
+  .views{display:flex; gap:6px; padding:0 0 10px}
+  .views button{flex:1; border:1px solid var(--line); background:var(--panel); color:var(--dim);
+    border-radius:10px; padding:8px 4px; font-size:.74rem; font-weight:800; cursor:pointer}
+  .views button.on{background:var(--steel); border-color:var(--steel); color:#0a1520}
+
+  .days{display:flex; gap:6px; overflow-x:auto; padding:2px 0 8px; scrollbar-width:none}
+  .days::-webkit-scrollbar{display:none}
+  .day{border:1px solid var(--line); background:var(--panel); color:var(--dim); border-radius:999px;
+    padding:6px 11px; font-size:.72rem; font-weight:800; white-space:nowrap; cursor:pointer; flex-shrink:0}
+  .day.on{background:var(--steel); border-color:var(--steel); color:#0a1520}
+  .day .dot{display:inline-block; width:6px; height:6px; border-radius:50%; background:#000; margin-left:5px}
+
+  /* races across the top */
+  .races{display:flex; gap:6px; overflow-x:auto; padding:2px 0 10px; scrollbar-width:none}
+  .races::-webkit-scrollbar{display:none}
+  .race{border:1px solid var(--line); background:var(--panel2); color:var(--dim); border-radius:12px;
+    padding:6px 10px; font-size:.7rem; font-weight:700; white-space:nowrap; cursor:pointer; flex-shrink:0}
+  .race b{color:var(--ink); font-weight:900}
+  .race .np{display:inline-block; margin-left:6px; background:#0a2740; border:1px solid #1d4d7a;
+    color:var(--steel2); border-radius:999px; padding:1px 7px; font-size:.62rem; font-weight:900}
+  .race.on{border-color:var(--steel); background:#12233c}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:18px;
+    padding:16px; margin-bottom:12px; box-shadow:0 8px 22px rgba(0,0,0,.35)}
+  .label{font-size:.65rem; color:var(--dim); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:6px}
+  .row{display:flex; justify-content:space-between; align-items:center; gap:8px}
+
+  .stats{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
+  .stat{background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:8px 10px; overflow:hidden}
+  .stat .label{margin-bottom:2px; white-space:nowrap; letter-spacing:1px}
+  .stat .v{font-weight:800; font-size:1.02rem; margin-top:2px; white-space:nowrap}
+  .stat .v.steel{color:var(--steel2)} .stat .v.pos{color:var(--em)} .stat .v.neg{color:#f87171}
+  .chip{background:#1c2a44; border:1px solid var(--line); border-radius:999px; padding:2px 8px; font-size:.68rem; color:var(--dim)}
+  .chip.money{background:#0a2740; border-color:#1d4d7a; color:var(--steel2); font-weight:700}
+  .chip.blue{background:#0a2740; border-color:#1d4d7a; color:var(--steel2); font-weight:800}
+  .chip.form{background:#1a2436; border-color:#33445f; color:var(--grey); font-weight:700}
+
+  .grp{display:flex; align-items:center; gap:8px; margin:14px 2px 6px}
+  .grp .gname{font-size:.72rem; font-weight:900; text-transform:uppercase; letter-spacing:1.2px; color:var(--steel2)}
+  .grp .gline{font-size:.62rem; color:var(--dim)}
+
+  .combo{display:flex; gap:10px; align-items:flex-start; background:var(--panel2);
+    border:1px solid var(--line); border-radius:14px; padding:10px 12px; margin-bottom:8px}
+  .combo .mid{flex:1; min-width:0}
+  .combo .legs{font-size:.74rem; font-weight:700; line-height:1.5}
+  .combo .legs small{color:var(--dim); font-weight:600}
+  .combo .r{font-size:.68rem; color:var(--dim); margin-top:4px; display:flex; gap:4px; flex-wrap:wrap; align-items:center}
+  .combo.pending{opacity:.75}
+  .badge{font-size:.62rem; font-weight:900; border-radius:8px; padding:3px 7px; white-space:nowrap; align-self:center}
+  .badge.won{background:#0b2e21; color:var(--em)}
+  .badge.lost{background:#331111; color:#fca5a5}
+  .badge.pending{background:#2d2410; color:#fcd34d}
+  .badge.nr{background:#1c2433; color:var(--grey)}
+
+  /* race panel */
+  .rp{background:var(--panel2); border:1px solid var(--line); border-radius:14px; padding:10px 12px; margin-bottom:8px}
+  .rp .head{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px}
+  .rp .head .t{font-weight:900; font-size:.8rem}
+  .rp .head .m{color:var(--dim); font-size:.7rem}
+  .rr{display:flex; align-items:center; gap:8px; padding:5px 0; border-top:1px solid #16203a; font-size:.74rem}
+  .rr:first-of-type{border-top:none}
+  .rr .pos{width:26px; text-align:center; font-weight:900; border-radius:7px; background:#1c2433; color:var(--grey); font-size:.66rem; flex-shrink:0}
+  .rr .pos.w{background:#0b2e21; color:var(--em)}
+  .rr .who{flex:1; min-width:0}
+  .rr .who b{white-space:nowrap}
+  .rr .who small{color:var(--dim); display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .rr .odds{font-weight:900; color:var(--steel2); flex-shrink:0}
+  .rr .picking{flex-shrink:0}
+  .rr.sel{background:#0d1f38; border-radius:10px; box-shadow:inset 0 0 0 1px #1d4d7a}
+
+  table{width:100%; border-collapse:collapse; font-size:.72rem; margin:6px 0 4px}
+  th{color:var(--dim); text-transform:uppercase; letter-spacing:.5px; font-size:.58rem; text-align:right; padding:4px; border-bottom:1px solid var(--line)}
+  th:first-child, td:first-child{text-align:left}
+  td{padding:4px; text-align:right; border-bottom:1px solid #16203a; white-space:nowrap}
+  td.pos{color:var(--em); font-weight:700} td.neg{color:#f87171; font-weight:700}
+  h4.sub{font-size:.66rem; text-transform:uppercase; letter-spacing:1.2px; color:var(--dim); margin:14px 0 2px}
+
+  footer.actions{position:fixed; bottom:0; left:0; right:0; background:linear-gradient(transparent,var(--bg) 30%);
+    padding:18px 12px 20px; max-width:440px; margin:0 auto}
+  .hint{font-size:.68rem; color:var(--dim); text-align:center; margin-top:8px; line-height:1.5}
+  .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:130px; background:#123; color:var(--ink);
+    border:1px solid var(--line); padding:10px 16px; border-radius:999px; font-size:.82rem; z-index:50; opacity:0; transition:opacity .25s}
+  .toast.show{opacity:1}
+  h3.sec{font-size:.68rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--dim); margin:18px 2px 8px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="brand">The <span>Edge</span></div>
+    <div class="datechip" id="dateChip"></div>
+  </div>
+  <div class="topbtns">
+    <button class="iconbtn" id="instBtn" style="display:none" onclick="doInstall()" title="Install app">⤓</button>
+  </div>
+</header>
+
+<div class="views">
+  <button id="v-day" class="on" onclick="setView('day')">The day</button>
+  <button id="v-season" onclick="setView('season')">The run</button>
+</div>
+
+<div id="dayView">
+  <div class="days" id="days"></div>
+  <div class="card">
+    <div class="row" id="permRow" style="margin:0 0 8px; display:none">
+      <div class="label" style="margin:0">The perm</div>
+      <span class="chip blue" id="permChip"></span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="label">Bank</div><div class="v steel" id="bankV">—</div></div>
+      <div class="stat"><div class="label">Day return</div><div class="v" id="retV">—</div></div>
+      <div class="stat"><div class="label">Day P/L</div><div class="v" id="plV">—</div></div>
+    </div>
+    <div class="row" style="margin-top:8px; font-size:.68rem; color:var(--dim)">
+      <span>Every line stakes <b style="color:var(--steel2)">1% of the rolling bank</b> — win-only, NRs refund</span>
+    </div>
+  </div>
+  <div class="races" id="races"></div>
+  <div id="raceList"></div>
+  <h3 class="sec">Singles · doubles · trebles · the lot</h3>
+  <div id="list"></div>
+</div>
+
+<div id="seasonView" style="display:none"></div>
+
+<footer class="actions">
+  <button class="btn ghost" id="fetchBtn" onclick="refreshDay(false)" style="background:var(--panel2); color:var(--dim); border:1px solid var(--line); border-radius:12px; padding:13px; font-weight:800; width:100%; cursor:pointer">⟳ Refresh this day</button>
+  <div class="hint"><b>The edge:</b> staying races <b>2m2f+</b> · <b>9 or fewer</b> runners ·
+  jockey <b>won 2+ at the course</b> in 60 days · trainer <b>3+ wins, 25%+</b> in 14 days ·
+  <b>4 or fewer</b> a day, shortest prices first.<br>
+  The day's picks run as a <b>full perm</b> — singles, every double, trebles to the 4-fold —
+  each line <b>1% of the rolling bank</b>, win-only, NRs refund.<br>
+  © Dave Court · v1</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* The Edge v1 — pure viewer. The laptop publishes each day's races (odds +
+   results), the picks and every settled perm line; the bank, stakes and
+   returns are all in the data. */
+
+let DAYS = [], SEL = todayStr(), day = null, stats = null, VIEW = "day", OPEN = null;
+const loaded = new Map();
+let deferredPrompt = null;
+
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function gbp(n){ return "£" + Number(n ?? 0).toFixed(2); }
+function sgn(n){ const v = Number(n ?? 0); return (v>=0?"+":"−") + "£" + Math.abs(v).toFixed(2); }
+function esc(s){ return String(s ?? "").replace(/[&<>\"']/g, c =>
+  ({\"&\":\"&amp;\",\"<\":\"&lt;\",\">\":\"&gt;\",'\"':\"&quot;\",\"'\":\"&#39;\"}[c])); }
+function sizeName(n){ return n===1?"Singles":n===2?"Doubles":n===3?"Trebles":n+="-folds"; }
+function posBadge(pos){
+  if(pos === 1) return `<span class="pos w">1st</span>`;
+  if(typeof pos === "number" && pos >= 2) return `<span class="pos">${pos}</span>`;
+  return `<span class="pos">·</span>`;
+}
+
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(window.__tt); window.__tt=setTimeout(()=>t.classList.remove("show"),2600); }
+
+async function jget(path){
+  const res = await fetch(path + \"?ts=\" + Date.now(), {cache:\"no-store\"});
+  if(!res.ok) throw new Error(path + \" → HTTP \" + res.status);
+  return res.json();
+}
+
+function setView(v){
+  VIEW = v;
+  document.getElementById(\"v-day\").className = (VIEW===\"day\" ? \"on\" : \"\");
+  document.getElementById(\"v-season\").className = (VIEW===\"season\" ? \"on\" : \"\");
+  document.getElementById(\"dayView\").style.display = VIEW===\"day\" ? \"\" : \"none\";
+  document.getElementById(\"seasonView\").style.display = VIEW===\"season\" ? \"\" : \"none\";
+  document.getElementById(\"dateChip\").textContent =
+    (VIEW===\"day\" ? SEL + (SEL===todayStr() ? \" · today\" : \"\") : \"the whole run\");
+  if(VIEW===\"season\") renderSeason();
+  window.scrollTo(0,0);
+}
+
+async function loadDay(d, quiet){
+  if(loaded.has(d)){ day = loaded.get(d); SEL = d; render(); return true; }
+  if(!quiet) document.getElementById(\"raceList\").innerHTML =
+    `<div class=\"card\" style=\"font-size:.82rem;color:var(--dim)\">Loading ${esc(d)}…</div>`;
+  try{
+    day = await jget(`data/${d}.json`);
+    loaded.set(d, day); SEL = d; render();
+    location.hash = d;
+    return true;
+  }catch(e){
+    if(d === todayStr()){
+      day = null; SEL = d; render();
+      toast(\"Nothing published for \" + d + \" yet\");
+    } else {
+      toast(\"No data for \" + d);
+      DAYS = DAYS.filter(x=>x!==d); renderTabs();
+      SEL = DAYS[0] || todayStr(); loadDay(SEL, true);
+    }
+    return false;
+  }
+}
+
+async function refreshDay(silent){
+  const btn=document.getElementById(\"fetchBtn\");
+  if(!silent) btn.textContent=\"⟳ Refreshing…\";
+  loaded.delete(SEL);
+  const ok = await loadDay(SEL, true);
+  if(!silent){ btn.textContent=\"⟳ Refresh this day\"; if(ok) toast(\"Refreshed \" + SEL); }
+}
+
+function renderTabs(){
+  const box = document.getElementById(\"days\");
+  box.innerHTML = \"\";
+  for(const d of DAYS){
+    const el = document.createElement(\"button\");
+    el.className = \"day\" + (d === SEL ? \" on\" : \"\");
+    el.textContent = d.slice(5).replace(\"-\", \"/\");
+    const rec = loaded.get(d);
+    if(rec && rec.score && rec.score.won + rec.score.lost > 0)
+      el.insertAdjacentHTML(\"beforeend\", '<span class=\"dot\"></span>');
+    el.onclick = () => loadDay(d);
+    box.appendChild(el);
+  }
+  if(SEL && !DAYS.includes(SEL)){
+    const el = document.createElement(\"button\");
+    el.className = \"day on\"; el.textContent = SEL.slice(5).replace(\"-\", \"/\");
+    box.prepend(el);
+  }
+}
+
+function raceKey(r){ return r.time + \"|\" + r.meeting; }
+
+function renderRaces(){
+  const box = document.getElementById(\"races\");
+  box.innerHTML = \"\";
+  const races = (day && day.races) || [];
+  for(const r of races){
+    const np = r.runners.filter(x => x.pick).length;
+    const el = document.createElement(\"button\");
+    el.className = \"race\" + (OPEN === raceKey(r) ? \" on\" : \"\");
+    el.innerHTML = `<b>${esc(r.time)}</b> ${esc(r.meeting)}` +
+      (np ? ` <span class=\"np\">${np}</span>` : \"\");
+    el.onclick = () => { OPEN = (OPEN === raceKey(r) ? null : raceKey(r)); render(); };
+    box.appendChild(el);
+  }
+}
+
+function renderRaceList(){
+  const box = document.getElementById(\"raceList\");
+  const races = (day && day.races) || [];
+  if(!races.length){
+    box.innerHTML = `<div class=\"card\" style=\"font-size:.82rem;color:var(--dim)\">No races stored for ${esc(SEL)}.</div>`;
+    return;
+  }
+  const open = OPEN && races.find(r => raceKey(r) === OPEN);
+  if(!open){ box.innerHTML = \"\"; return; }
+  const cls = open.race_class ? ` · class ${esc(open.race_class)}` : \"\";
+  const rows = open.runners.slice().sort((a,b) =>
+    (typeof a.pos === \"number\" && a.pos >= 1 ? a.pos : 99) - (typeof b.pos === \"number\" && b.pos >= 1 ? b.pos : 99)
+    || (a.rank ?? 99) - (b.rank ?? 99));
+  box.innerHTML = `<div class=\"rp\">
+    <div class=\"head\"><span class=\"t\">${esc(open.time)} · ${esc(open.name || open.meeting)}</span>
+      <span class=\"m\">${esc(open.meeting)}${cls} · ${esc(open.distance || \"\")}</span></div>` +
+    rows.map(x => `<div class=\"rr${x.pick ? \" sel\" : \"\"}\">
+      ${posBadge(x.pos)}
+      <div class=\"who\"><b>${esc(x.horse)}</b>${x.pick ? ' <span class=\"chip blue\" style=\"font-size:.6rem\">THE EDGE</span>' : \"\"}
+        <small>${esc(x.trainer)} · ${esc(x.jockey)}</small></div>
+      <span class=\"odds\">${esc(x.odds || \"—\")}</span>
+      <span class=\"picking\"><span class=\"chip form\">${x.t14 ? \"T \"+esc(x.t14) : \"\"}${x.t14 && x.jc ? \" · \" : \"\"}${x.jc ? \"J@crs \"+esc(x.jc) : \"\"}</span></span>
+    </div>`).join(\"\") + `</div>`;
+}
+
+function render(){
+  if(VIEW !== \"day\") { document.getElementById(\"dateChip\").textContent = \"the whole run\"; return; }
+  document.getElementById(\"dateChip\").textContent = SEL + (SEL===todayStr() ? \" · today\" : \"\");
+  renderTabs();
+  const sc = day && day.score;
+  const pr = document.getElementById(\"permRow\"), pc = document.getElementById(\"permChip\");
+  if(sc && sc.picks){
+    pr.style.display = \"\";
+    pc.textContent = `${sc.picks} pick${sc.picks===1?\"\":\"s\"} → ${sc.lines} lines` +
+      (sc.pending ? ` · ${sc.pending} to run` : \"\");
+  } else pr.style.display = \"none\";
+  const bankV=document.getElementById(\"bankV\"), retV=document.getElementById(\"retV\"), plV=document.getElementById(\"plV\");
+  if(sc && day.money){
+    bankV.textContent = gbp(day.money.bank_after);
+    retV.textContent = gbp(day.money.returned);
+    const pl = day.money.returned - day.money.staked;
+    plV.textContent = sgn(pl);
+    plV.className = \"v \" + (pl>=0?\"pos\":\"neg\");
+  } else {
+    bankV.textContent=\"—\"; retV.textContent=\"—\"; plV.textContent=\"—\"; plV.className=\"v\";
+  }
+
+  renderRaces();
+  renderRaceList();
+
+  const list=document.getElementById(\"list\");
+  if(!day || !(day.combos||[]).length){
+    list.innerHTML = `<div class=\"card\" style=\"font-size:.82rem;color:var(--dim)\">
+      No qualifying picks on ${esc(SEL)} — no staying race with a course-winning jockey and a hot trainer today.</div>`;
+    return;
+  }
+  const picks = Object.fromEntries((day.picks||[]).map(p => [p.horse, p]));
+  const combos = day.combos;
+  let html = \"\";
+  const sizes = [...new Set(combos.map(c=>c.size))].sort((a,b)=>a-b);
+  for(const sz of sizes){
+    const group = combos.filter(c=>c.size===sz);
+    const gw = group.filter(c=>c.res===\"WIN\").length, gl = group.filter(c=>c.res===\"LOSE\").length;
+    html += `<div class=\"grp\"><span class=\"gname\">${sizeName(sz)}</span>
+      <span class=\"gline\">${group.length} line${group.length===1?\"\":\"s\"} · ${gw} won · ${gl} lost</span></div>`;
+    html += group.map(c=>{
+      const legs = c.legs.map(l=>{
+        const p = picks[l.horse];
+        const chips = (sz===1 && p)
+          ? `<span class=\"chip form\">J@crs ${esc(p.jc||\"\")} · T ${esc(p.t14||\"—\")}</span>
+             <span class=\"chip form\">ran ${p.last_ran ?? \"?\"}d</span><span class=\"chip form\">rank ${p.rank}</span>`
+          : \"\";
+        return `<div style=\"margin-bottom:2px\">
+          <b style=\"color:var(--steel2)\">${esc(l.time)}</b> <small>${esc(l.meeting)}</small> —
+          <b>${esc(l.horse)}</b> <small>@ ${esc(l.odds)}</small>
+          ${chips?`<div style=\"margin-top:2px\">${chips}</div>`:\"\"}
+        </div>`;
+      }).join(\"\");
+      let badge, amt;
+      if(c.res === \"WIN\"){ badge = `<div class=\"badge won\">WON</div>`; amt = `<span class=\"chip money\">${gbp(c.ret)}</span>`; }
+      else if(c.res === \"LOSE\"){ badge = `<div class=\"badge lost\">LOST</div>`; amt = `<span class=\"chip\">− ${gbp(c.stake)}</span>`; }
+      else if(c.res === \"NR\"){ badge = `<div class=\"badge nr\">REFUND</div>`; amt = `<span class=\"chip\">stake back</span>`; }
+      else { badge = `<div class=\"badge pending\">TO RUN</div>`; amt = `<span class=\"chip\">stake ${gbp(c.stake)}</span>`; }
+      return `<div class=\"combo ${c.res===\"PENDING\"?\"pending\":\"\"}\">
+        <div class=\"mid\"><div class=\"legs\">${legs}</div>
+          <div class=\"r\"><span class=\"chip blue\">× ${c.dec ? esc(c.dec.toFixed(2)) : \"—\"}</span>${amt||\"\"}</div></div>
+        ${badge}</div>`;
+    }).join(\"\");
+  }
+  list.innerHTML = html;
+}
+
+function tbl(t, label){
+  if(!t || !t.length) return \"\";
+  return `<h4 class=\"sub\">${esc(label)}</h4>
+  <table><tr><th></th><th>lines</th><th>won</th><th>staked</th><th>ROI</th></tr>` +
+    t.map(x=>`<tr><td>${esc(x.size||x.key)}</td><td>${x.lines??x.n??\"\"}</td><td>${x.won??\"\"}</td>
+      <td>${x.staked!=null?gbp(x.staked):\"\"}</td>
+      <td class=\"${x.roi>=0?\"pos\":\"neg\"}\">${x.roi>=0?\"+\":\"\"}${x.roi}%</td></tr>`).join(\"\") + \"</table>\";
+}
+
+function renderSeason(){
+  const el = document.getElementById(\"seasonView\");
+  if(!stats){ el.innerHTML = `<div class=\"card\">Loading the run…</div>`;
+    jget(\"data/stats.json\").then(j=>{ stats=j; renderSeason(); }).catch(()=>{}); return; }
+  const s = stats.season, bd = stats.best_day;
+  document.getElementById(\"seasonView\").innerHTML = `
+  <div class=\"card\">
+    <div class=\"label\">The whole run — £10 bank, 1% of the bank a line</div>
+    <div class=\"row\"><div class=\"v steel\" style=\"font-size:1.3rem;font-weight:900\">${gbp(s.staked)} → ${gbp(s.returned)}</div>
+      <span class=\"chip blue\">bank ${gbp(s.bank)}</span></div>
+    <div class=\"r\" style=\"font-size:.72rem;color:var(--dim);margin-top:6px\">
+      ${s.picks} picks · ${s.lines} lines · ${s.won} won · ${s.lost} lost · over ${s.days} days</div>
+    <div class=\"row\" style=\"margin-top:8px\">
+      <span class=\"chip ${s.roi>=0?\"blue\":\"\"}\" style=\"${s.roi<0?\"color:#f87171\":\"\"}\">ROI ${s.roi>=0?\"+\":\"\"}${s.roi}%</span>
+      ${bd?`<span style=\"font-size:.75rem;color:var(--dim)\">Best day: <b style=\"color:var(--ink)\">${esc(bd.date)}</b> → ${gbp(bd.pl)}</span>`:\"\"}
+    </div>
+  </div>
+  <div class=\"card\">
+    <div class=\"label\">By fold size</div>
+    ${tbl(stats.by_size, \"\")}
+  </div>
+  <div class=\"card\">
+    <div class=\"label\">Monthly bank</div>
+    <table><tr><th>month</th><th>bank after</th></tr>
+    ${Object.entries(stats.per_day ? monthlyBanks() : {}).map(([m,v]) =>
+      `<tr><td>${esc(m)}</td><td class=\"pos\">${gbp(v)}</td></tr>`).join(\"\")}</table>
+  </div>
+  <div class=\"card\">
+    <div class=\"label\">The edge</div>
+    <div style=\"font-size:.78rem; line-height:1.7\">
+      · race <b>${esc(s_1(stats.rule.race))}</b> — the market is kinder on stayers<br>
+      · field <b>9 or fewer</b> — big fields are the worst books<br>
+      · jockey <b>${esc(s_1(stats.rule.jockey))}</b><br>
+      · trainer <b>${esc(s_1(stats.rule.tier))}</b><br>
+      · max <b>4 picks a day</b>, shortest prices first · perms to the 4-fold<br>
+      · every line <b>1% of the rolling bank</b>, win-only, NRs refund
+    </div>
+  </div>
+  <div class=\"card\">
+    <div class=\"label\">Every little advantage found</div>
+    <div style=\"font-size:.74rem; line-height:1.8\">
+      ${(stats.edges||[]).map(e=>`· ${esc(s_1(e))}`).join(\"<br>\")}
+    </div>
+  </div>`;
+}
+function s_1(s){ return String(s || \"\").replace(/&/g,\"&amp;\").replace(/</g,\"&lt;\"); }
+function monthlyBanks(){
+  const out = {};
+  let last = null;
+  for(const d of Object.keys(stats.per_day).sort()){
+    if(last === null || d.slice(0,7) !== last) out[d.slice(0,7)] = stats.per_day[d].bank_after;
+    last = d.slice(0,7);
+  }
+  return out;
+}
+
+async function watch(){
+  const t = todayStr();
+  if(t !== window.__lastDay){ window.__lastDay = t; DAYS = []; loaded.clear(); await init(true); return; }
+  if(SEL !== t || VIEW !== \"day\") return;
+  if(day) await refreshDay(true);
+}
+
+window.addEventListener(\"beforeinstallprompt\", e=>{
+  e.preventDefault(); deferredPrompt=e; document.getElementById(\"instBtn\").style.display=\"\";
+});
+function doInstall(){ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; document.getElementById(\"instBtn\").style.display=\"none\"; } }
+
+async function init(quiet){
+  window.__lastDay = todayStr();
+  jget(\"data/stats.json\").then(j=>{ stats=j; if(VIEW===\"season\") renderSeason(); }).catch(()=>{});
+  try{
+    const idx = await jget(\"data/index.json\");
+    DAYS = idx.days || [];
+  }catch(e){ DAYS = []; }
+  if(!DAYS.includes(todayStr())) DAYS.unshift(todayStr());
+  const hash = (location.hash || \"\").replace(\"#\", \"\");
+  SEL = (hash && DAYS.includes(hash)) ? hash
+      : (DAYS.includes(todayStr()) ? todayStr() : DAYS[0] || todayStr());
+  await loadDay(SEL, quiet);
+}
+
+init();
+setInterval(watch, 60000);
+
+/* keep the last row clear of the fixed footer */
+const footerEl = document.querySelector(\"footer.actions\");
+function fitFooter(){ document.body.style.paddingBottom = (footerEl.offsetHeight + 20) + \"px\"; }
+window.addEventListener(\"resize\", fitFooter);
+if(window.ResizeObserver) new ResizeObserver(fitFooter).observe(footerEl);
+fitFooter();
+
+if(\"serviceWorker\" in navigator) navigator.serviceWorker.register(\"sw.js?v=\"+Date.now(), { updateViaCache: \"none\" }).catch(()=>{});
+</script>
+</body>
+</html>
