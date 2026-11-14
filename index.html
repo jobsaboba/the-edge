@@ -181,8 +181,8 @@ let deferredPrompt = null;
 function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function gbp(n){ return "£" + Number(n ?? 0).toFixed(2); }
 function sgn(n){ const v = Number(n ?? 0); return (v>=0?"+":"−") + "£" + Math.abs(v).toFixed(2); }
-function esc(s){ return String(s ?? "").replace(/[&<>\"']/g, c =>
-  ({\"&\":\"&amp;\",\"<\":\"&lt;\",\">\":\"&gt;\",'\"':\"&quot;\",\"'\":\"&#39;\"}[c])); }
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function sizeName(n){ return n===1?"Singles":n===2?"Doubles":n===3?"Trebles":n+="-folds"; }
 function posBadge(pos){
   if(pos === 1) return `<span class="pos w">1st</span>`;
@@ -194,27 +194,27 @@ function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg
   clearTimeout(window.__tt); window.__tt=setTimeout(()=>t.classList.remove("show"),2600); }
 
 async function jget(path){
-  const res = await fetch(path + \"?ts=\" + Date.now(), {cache:\"no-store\"});
-  if(!res.ok) throw new Error(path + \" → HTTP \" + res.status);
+  const res = await fetch(path + "?ts=" + Date.now(), {cache:"no-store"});
+  if(!res.ok) throw new Error(path + " → HTTP " + res.status);
   return res.json();
 }
 
 function setView(v){
   VIEW = v;
-  document.getElementById(\"v-day\").className = (VIEW===\"day\" ? \"on\" : \"\");
-  document.getElementById(\"v-season\").className = (VIEW===\"season\" ? \"on\" : \"\");
-  document.getElementById(\"dayView\").style.display = VIEW===\"day\" ? \"\" : \"none\";
-  document.getElementById(\"seasonView\").style.display = VIEW===\"season\" ? \"\" : \"none\";
-  document.getElementById(\"dateChip\").textContent =
-    (VIEW===\"day\" ? SEL + (SEL===todayStr() ? \" · today\" : \"\") : \"the whole run\");
-  if(VIEW===\"season\") renderSeason();
+  document.getElementById("v-day").className = (VIEW==="day" ? "on" : "");
+  document.getElementById("v-season").className = (VIEW==="season" ? "on" : "");
+  document.getElementById("dayView").style.display = VIEW==="day" ? "" : "none";
+  document.getElementById("seasonView").style.display = VIEW==="season" ? "" : "none";
+  document.getElementById("dateChip").textContent =
+    (VIEW==="day" ? SEL + (SEL===todayStr() ? " · today" : "") : "the whole run");
+  if(VIEW==="season") renderSeason();
   window.scrollTo(0,0);
 }
 
 async function loadDay(d, quiet){
   if(loaded.has(d)){ day = loaded.get(d); SEL = d; render(); return true; }
-  if(!quiet) document.getElementById(\"raceList\").innerHTML =
-    `<div class=\"card\" style=\"font-size:.82rem;color:var(--dim)\">Loading ${esc(d)}…</div>`;
+  if(!quiet) document.getElementById("raceList").innerHTML =
+    `<div class="card" style="font-size:.82rem;color:var(--dim)">Loading ${esc(d)}…</div>`;
   try{
     day = await jget(`data/${d}.json`);
     loaded.set(d, day); SEL = d; render();
@@ -223,9 +223,9 @@ async function loadDay(d, quiet){
   }catch(e){
     if(d === todayStr()){
       day = null; SEL = d; render();
-      toast(\"Nothing published for \" + d + \" yet\");
+      toast("Nothing published for " + d + " yet");
     } else {
-      toast(\"No data for \" + d);
+      toast("No data for " + d);
       DAYS = DAYS.filter(x=>x!==d); renderTabs();
       SEL = DAYS[0] || todayStr(); loadDay(SEL, true);
     }
@@ -234,181 +234,181 @@ async function loadDay(d, quiet){
 }
 
 async function refreshDay(silent){
-  const btn=document.getElementById(\"fetchBtn\");
-  if(!silent) btn.textContent=\"⟳ Refreshing…\";
+  const btn=document.getElementById("fetchBtn");
+  if(!silent) btn.textContent="⟳ Refreshing…";
   loaded.delete(SEL);
   const ok = await loadDay(SEL, true);
-  if(!silent){ btn.textContent=\"⟳ Refresh this day\"; if(ok) toast(\"Refreshed \" + SEL); }
+  if(!silent){ btn.textContent="⟳ Refresh this day"; if(ok) toast("Refreshed " + SEL); }
 }
 
 function renderTabs(){
-  const box = document.getElementById(\"days\");
-  box.innerHTML = \"\";
+  const box = document.getElementById("days");
+  box.innerHTML = "";
   for(const d of DAYS){
-    const el = document.createElement(\"button\");
-    el.className = \"day\" + (d === SEL ? \" on\" : \"\");
-    el.textContent = d.slice(5).replace(\"-\", \"/\");
+    const el = document.createElement("button");
+    el.className = "day" + (d === SEL ? " on" : "");
+    el.textContent = d.slice(5).replace("-", "/");
     const rec = loaded.get(d);
     if(rec && rec.score && rec.score.won + rec.score.lost > 0)
-      el.insertAdjacentHTML(\"beforeend\", '<span class=\"dot\"></span>');
+      el.insertAdjacentHTML("beforeend", '<span class="dot"></span>');
     el.onclick = () => loadDay(d);
     box.appendChild(el);
   }
   if(SEL && !DAYS.includes(SEL)){
-    const el = document.createElement(\"button\");
-    el.className = \"day on\"; el.textContent = SEL.slice(5).replace(\"-\", \"/\");
+    const el = document.createElement("button");
+    el.className = "day on"; el.textContent = SEL.slice(5).replace("-", "/");
     box.prepend(el);
   }
 }
 
-function raceKey(r){ return r.time + \"|\" + r.meeting; }
+function raceKey(r){ return r.time + "|" + r.meeting; }
 
 function renderRaces(){
-  const box = document.getElementById(\"races\");
-  box.innerHTML = \"\";
+  const box = document.getElementById("races");
+  box.innerHTML = "";
   const races = (day && day.races) || [];
   for(const r of races){
     const np = r.runners.filter(x => x.pick).length;
-    const el = document.createElement(\"button\");
-    el.className = \"race\" + (OPEN === raceKey(r) ? \" on\" : \"\");
+    const el = document.createElement("button");
+    el.className = "race" + (OPEN === raceKey(r) ? " on" : "");
     el.innerHTML = `<b>${esc(r.time)}</b> ${esc(r.meeting)}` +
-      (np ? ` <span class=\"np\">${np}</span>` : \"\");
+      (np ? ` <span class="np">${np}</span>` : "");
     el.onclick = () => { OPEN = (OPEN === raceKey(r) ? null : raceKey(r)); render(); };
     box.appendChild(el);
   }
 }
 
 function renderRaceList(){
-  const box = document.getElementById(\"raceList\");
+  const box = document.getElementById("raceList");
   const races = (day && day.races) || [];
   if(!races.length){
-    box.innerHTML = `<div class=\"card\" style=\"font-size:.82rem;color:var(--dim)\">No races stored for ${esc(SEL)}.</div>`;
+    box.innerHTML = `<div class="card" style="font-size:.82rem;color:var(--dim)">No races stored for ${esc(SEL)}.</div>`;
     return;
   }
   const open = OPEN && races.find(r => raceKey(r) === OPEN);
-  if(!open){ box.innerHTML = \"\"; return; }
-  const cls = open.race_class ? ` · class ${esc(open.race_class)}` : \"\";
+  if(!open){ box.innerHTML = ""; return; }
+  const cls = open.race_class ? ` · class ${esc(open.race_class)}` : "";
   const rows = open.runners.slice().sort((a,b) =>
-    (typeof a.pos === \"number\" && a.pos >= 1 ? a.pos : 99) - (typeof b.pos === \"number\" && b.pos >= 1 ? b.pos : 99)
+    (typeof a.pos === "number" && a.pos >= 1 ? a.pos : 99) - (typeof b.pos === "number" && b.pos >= 1 ? b.pos : 99)
     || (a.rank ?? 99) - (b.rank ?? 99));
-  box.innerHTML = `<div class=\"rp\">
-    <div class=\"head\"><span class=\"t\">${esc(open.time)} · ${esc(open.name || open.meeting)}</span>
-      <span class=\"m\">${esc(open.meeting)}${cls} · ${esc(open.distance || \"\")}</span></div>` +
-    rows.map(x => `<div class=\"rr${x.pick ? \" sel\" : \"\"}\">
+  box.innerHTML = `<div class="rp">
+    <div class="head"><span class="t">${esc(open.time)} · ${esc(open.name || open.meeting)}</span>
+      <span class="m">${esc(open.meeting)}${cls} · ${esc(open.distance || "")}</span></div>` +
+    rows.map(x => `<div class="rr${x.pick ? " sel" : ""}">
       ${posBadge(x.pos)}
-      <div class=\"who\"><b>${esc(x.horse)}</b>${x.pick ? ' <span class=\"chip blue\" style=\"font-size:.6rem\">THE EDGE</span>' : \"\"}
+      <div class="who"><b>${esc(x.horse)}</b>${x.pick ? ' <span class="chip blue" style="font-size:.6rem">THE EDGE</span>' : ""}
         <small>${esc(x.trainer)} · ${esc(x.jockey)}</small></div>
-      <span class=\"odds\">${esc(x.odds || \"—\")}</span>
-      <span class=\"picking\"><span class=\"chip form\">${x.t14 ? \"T \"+esc(x.t14) : \"\"}${x.t14 && x.jc ? \" · \" : \"\"}${x.jc ? \"J@crs \"+esc(x.jc) : \"\"}</span></span>
-    </div>`).join(\"\") + `</div>`;
+      <span class="odds">${esc(x.odds || "—")}</span>
+      <span class="picking"><span class="chip form">${x.t14 ? "T "+esc(x.t14) : ""}${x.t14 && x.jc ? " · " : ""}${x.jc ? "J@crs "+esc(x.jc) : ""}</span></span>
+    </div>`).join("") + `</div>`;
 }
 
 function render(){
-  if(VIEW !== \"day\") { document.getElementById(\"dateChip\").textContent = \"the whole run\"; return; }
-  document.getElementById(\"dateChip\").textContent = SEL + (SEL===todayStr() ? \" · today\" : \"\");
+  if(VIEW !== "day") { document.getElementById("dateChip").textContent = "the whole run"; return; }
+  document.getElementById("dateChip").textContent = SEL + (SEL===todayStr() ? " · today" : "");
   renderTabs();
   const sc = day && day.score;
-  const pr = document.getElementById(\"permRow\"), pc = document.getElementById(\"permChip\");
+  const pr = document.getElementById("permRow"), pc = document.getElementById("permChip");
   if(sc && sc.picks){
-    pr.style.display = \"\";
-    pc.textContent = `${sc.picks} pick${sc.picks===1?\"\":\"s\"} → ${sc.lines} lines` +
-      (sc.pending ? ` · ${sc.pending} to run` : \"\");
-  } else pr.style.display = \"none\";
-  const bankV=document.getElementById(\"bankV\"), retV=document.getElementById(\"retV\"), plV=document.getElementById(\"plV\");
+    pr.style.display = "";
+    pc.textContent = `${sc.picks} pick${sc.picks===1?"":"s"} → ${sc.lines} lines` +
+      (sc.pending ? ` · ${sc.pending} to run` : "");
+  } else pr.style.display = "none";
+  const bankV=document.getElementById("bankV"), retV=document.getElementById("retV"), plV=document.getElementById("plV");
   if(sc && day.money){
     bankV.textContent = gbp(day.money.bank_after);
     retV.textContent = gbp(day.money.returned);
     const pl = day.money.returned - day.money.staked;
     plV.textContent = sgn(pl);
-    plV.className = \"v \" + (pl>=0?\"pos\":\"neg\");
+    plV.className = "v " + (pl>=0?"pos":"neg");
   } else {
-    bankV.textContent=\"—\"; retV.textContent=\"—\"; plV.textContent=\"—\"; plV.className=\"v\";
+    bankV.textContent="—"; retV.textContent="—"; plV.textContent="—"; plV.className="v";
   }
 
   renderRaces();
   renderRaceList();
 
-  const list=document.getElementById(\"list\");
+  const list=document.getElementById("list");
   if(!day || !(day.combos||[]).length){
-    list.innerHTML = `<div class=\"card\" style=\"font-size:.82rem;color:var(--dim)\">
+    list.innerHTML = `<div class="card" style="font-size:.82rem;color:var(--dim)">
       No qualifying picks on ${esc(SEL)} — no staying race with a course-winning jockey and a hot trainer today.</div>`;
     return;
   }
   const picks = Object.fromEntries((day.picks||[]).map(p => [p.horse, p]));
   const combos = day.combos;
-  let html = \"\";
+  let html = "";
   const sizes = [...new Set(combos.map(c=>c.size))].sort((a,b)=>a-b);
   for(const sz of sizes){
     const group = combos.filter(c=>c.size===sz);
-    const gw = group.filter(c=>c.res===\"WIN\").length, gl = group.filter(c=>c.res===\"LOSE\").length;
-    html += `<div class=\"grp\"><span class=\"gname\">${sizeName(sz)}</span>
-      <span class=\"gline\">${group.length} line${group.length===1?\"\":\"s\"} · ${gw} won · ${gl} lost</span></div>`;
+    const gw = group.filter(c=>c.res==="WIN").length, gl = group.filter(c=>c.res==="LOSE").length;
+    html += `<div class="grp"><span class="gname">${sizeName(sz)}</span>
+      <span class="gline">${group.length} line${group.length===1?"":"s"} · ${gw} won · ${gl} lost</span></div>`;
     html += group.map(c=>{
       const legs = c.legs.map(l=>{
         const p = picks[l.horse];
         const chips = (sz===1 && p)
-          ? `<span class=\"chip form\">J@crs ${esc(p.jc||\"\")} · T ${esc(p.t14||\"—\")}</span>
-             <span class=\"chip form\">ran ${p.last_ran ?? \"?\"}d</span><span class=\"chip form\">rank ${p.rank}</span>`
-          : \"\";
-        return `<div style=\"margin-bottom:2px\">
-          <b style=\"color:var(--steel2)\">${esc(l.time)}</b> <small>${esc(l.meeting)}</small> —
+          ? `<span class="chip form">J@crs ${esc(p.jc||"")} · T ${esc(p.t14||"—")}</span>
+             <span class="chip form">ran ${p.last_ran ?? "?"}d</span><span class="chip form">rank ${p.rank}</span>`
+          : "";
+        return `<div style="margin-bottom:2px">
+          <b style="color:var(--steel2)">${esc(l.time)}</b> <small>${esc(l.meeting)}</small> —
           <b>${esc(l.horse)}</b> <small>@ ${esc(l.odds)}</small>
-          ${chips?`<div style=\"margin-top:2px\">${chips}</div>`:\"\"}
+          ${chips?`<div style="margin-top:2px">${chips}</div>`:""}
         </div>`;
-      }).join(\"\");
+      }).join("");
       let badge, amt;
-      if(c.res === \"WIN\"){ badge = `<div class=\"badge won\">WON</div>`; amt = `<span class=\"chip money\">${gbp(c.ret)}</span>`; }
-      else if(c.res === \"LOSE\"){ badge = `<div class=\"badge lost\">LOST</div>`; amt = `<span class=\"chip\">− ${gbp(c.stake)}</span>`; }
-      else if(c.res === \"NR\"){ badge = `<div class=\"badge nr\">REFUND</div>`; amt = `<span class=\"chip\">stake back</span>`; }
-      else { badge = `<div class=\"badge pending\">TO RUN</div>`; amt = `<span class=\"chip\">stake ${gbp(c.stake)}</span>`; }
-      return `<div class=\"combo ${c.res===\"PENDING\"?\"pending\":\"\"}\">
-        <div class=\"mid\"><div class=\"legs\">${legs}</div>
-          <div class=\"r\"><span class=\"chip blue\">× ${c.dec ? esc(c.dec.toFixed(2)) : \"—\"}</span>${amt||\"\"}</div></div>
+      if(c.res === "WIN"){ badge = `<div class="badge won">WON</div>`; amt = `<span class="chip money">${gbp(c.ret)}</span>`; }
+      else if(c.res === "LOSE"){ badge = `<div class="badge lost">LOST</div>`; amt = `<span class="chip">− ${gbp(c.stake)}</span>`; }
+      else if(c.res === "NR"){ badge = `<div class="badge nr">REFUND</div>`; amt = `<span class="chip">stake back</span>`; }
+      else { badge = `<div class="badge pending">TO RUN</div>`; amt = `<span class="chip">stake ${gbp(c.stake)}</span>`; }
+      return `<div class="combo ${c.res==="PENDING"?"pending":""}">
+        <div class="mid"><div class="legs">${legs}</div>
+          <div class="r"><span class="chip blue">× ${c.dec ? esc(c.dec.toFixed(2)) : "—"}</span>${amt||""}</div></div>
         ${badge}</div>`;
-    }).join(\"\");
+    }).join("");
   }
   list.innerHTML = html;
 }
 
 function tbl(t, label){
-  if(!t || !t.length) return \"\";
-  return `<h4 class=\"sub\">${esc(label)}</h4>
+  if(!t || !t.length) return "";
+  return `<h4 class="sub">${esc(label)}</h4>
   <table><tr><th></th><th>lines</th><th>won</th><th>staked</th><th>ROI</th></tr>` +
-    t.map(x=>`<tr><td>${esc(x.size||x.key)}</td><td>${x.lines??x.n??\"\"}</td><td>${x.won??\"\"}</td>
-      <td>${x.staked!=null?gbp(x.staked):\"\"}</td>
-      <td class=\"${x.roi>=0?\"pos\":\"neg\"}\">${x.roi>=0?\"+\":\"\"}${x.roi}%</td></tr>`).join(\"\") + \"</table>\";
+    t.map(x=>`<tr><td>${esc(x.size||x.key)}</td><td>${x.lines??x.n??""}</td><td>${x.won??""}</td>
+      <td>${x.staked!=null?gbp(x.staked):""}</td>
+      <td class="${x.roi>=0?"pos":"neg"}">${x.roi>=0?"+":""}${x.roi}%</td></tr>`).join("") + "</table>";
 }
 
 function renderSeason(){
-  const el = document.getElementById(\"seasonView\");
-  if(!stats){ el.innerHTML = `<div class=\"card\">Loading the run…</div>`;
-    jget(\"data/stats.json\").then(j=>{ stats=j; renderSeason(); }).catch(()=>{}); return; }
+  const el = document.getElementById("seasonView");
+  if(!stats){ el.innerHTML = `<div class="card">Loading the run…</div>`;
+    jget("data/stats.json").then(j=>{ stats=j; renderSeason(); }).catch(()=>{}); return; }
   const s = stats.season, bd = stats.best_day;
-  document.getElementById(\"seasonView\").innerHTML = `
-  <div class=\"card\">
-    <div class=\"label\">The whole run — £10 bank, 1% of the bank a line</div>
-    <div class=\"row\"><div class=\"v steel\" style=\"font-size:1.3rem;font-weight:900\">${gbp(s.staked)} → ${gbp(s.returned)}</div>
-      <span class=\"chip blue\">bank ${gbp(s.bank)}</span></div>
-    <div class=\"r\" style=\"font-size:.72rem;color:var(--dim);margin-top:6px\">
+  document.getElementById("seasonView").innerHTML = `
+  <div class="card">
+    <div class="label">The whole run — £10 bank, 1% of the bank a line</div>
+    <div class="row"><div class="v steel" style="font-size:1.3rem;font-weight:900">${gbp(s.staked)} → ${gbp(s.returned)}</div>
+      <span class="chip blue">bank ${gbp(s.bank)}</span></div>
+    <div class="r" style="font-size:.72rem;color:var(--dim);margin-top:6px">
       ${s.picks} picks · ${s.lines} lines · ${s.won} won · ${s.lost} lost · over ${s.days} days</div>
-    <div class=\"row\" style=\"margin-top:8px\">
-      <span class=\"chip ${s.roi>=0?\"blue\":\"\"}\" style=\"${s.roi<0?\"color:#f87171\":\"\"}\">ROI ${s.roi>=0?\"+\":\"\"}${s.roi}%</span>
-      ${bd?`<span style=\"font-size:.75rem;color:var(--dim)\">Best day: <b style=\"color:var(--ink)\">${esc(bd.date)}</b> → ${gbp(bd.pl)}</span>`:\"\"}
+    <div class="row" style="margin-top:8px">
+      <span class="chip ${s.roi>=0?"blue":""}" style="${s.roi<0?"color:#f87171":""}">ROI ${s.roi>=0?"+":""}${s.roi}%</span>
+      ${bd?`<span style="font-size:.75rem;color:var(--dim)">Best day: <b style="color:var(--ink)">${esc(bd.date)}</b> → ${gbp(bd.pl)}</span>`:""}
     </div>
   </div>
-  <div class=\"card\">
-    <div class=\"label\">By fold size</div>
-    ${tbl(stats.by_size, \"\")}
+  <div class="card">
+    <div class="label">By fold size</div>
+    ${tbl(stats.by_size, "")}
   </div>
-  <div class=\"card\">
-    <div class=\"label\">Monthly bank</div>
+  <div class="card">
+    <div class="label">Monthly bank</div>
     <table><tr><th>month</th><th>bank after</th></tr>
     ${Object.entries(stats.per_day ? monthlyBanks() : {}).map(([m,v]) =>
-      `<tr><td>${esc(m)}</td><td class=\"pos\">${gbp(v)}</td></tr>`).join(\"\")}</table>
+      `<tr><td>${esc(m)}</td><td class="pos">${gbp(v)}</td></tr>`).join("")}</table>
   </div>
-  <div class=\"card\">
-    <div class=\"label\">The edge</div>
-    <div style=\"font-size:.78rem; line-height:1.7\">
+  <div class="card">
+    <div class="label">The edge</div>
+    <div style="font-size:.78rem; line-height:1.7">
       · race <b>${esc(s_1(stats.rule.race))}</b> — the market is kinder on stayers<br>
       · field <b>9 or fewer</b> — big fields are the worst books<br>
       · jockey <b>${esc(s_1(stats.rule.jockey))}</b><br>
@@ -417,14 +417,14 @@ function renderSeason(){
       · every line <b>1% of the rolling bank</b>, win-only, NRs refund
     </div>
   </div>
-  <div class=\"card\">
-    <div class=\"label\">Every little advantage found</div>
-    <div style=\"font-size:.74rem; line-height:1.8\">
-      ${(stats.edges||[]).map(e=>`· ${esc(s_1(e))}`).join(\"<br>\")}
+  <div class="card">
+    <div class="label">Every little advantage found</div>
+    <div style="font-size:.74rem; line-height:1.8">
+      ${(stats.edges||[]).map(e=>`· ${esc(s_1(e))}`).join("<br>")}
     </div>
   </div>`;
 }
-function s_1(s){ return String(s || \"\").replace(/&/g,\"&amp;\").replace(/</g,\"&lt;\"); }
+function s_1(s){ return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
 function monthlyBanks(){
   const out = {};
   let last = null;
@@ -438,24 +438,24 @@ function monthlyBanks(){
 async function watch(){
   const t = todayStr();
   if(t !== window.__lastDay){ window.__lastDay = t; DAYS = []; loaded.clear(); await init(true); return; }
-  if(SEL !== t || VIEW !== \"day\") return;
+  if(SEL !== t || VIEW !== "day") return;
   if(day) await refreshDay(true);
 }
 
-window.addEventListener(\"beforeinstallprompt\", e=>{
-  e.preventDefault(); deferredPrompt=e; document.getElementById(\"instBtn\").style.display=\"\";
+window.addEventListener("beforeinstallprompt", e=>{
+  e.preventDefault(); deferredPrompt=e; document.getElementById("instBtn").style.display="";
 });
-function doInstall(){ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; document.getElementById(\"instBtn\").style.display=\"none\"; } }
+function doInstall(){ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; document.getElementById("instBtn").style.display="none"; } }
 
 async function init(quiet){
   window.__lastDay = todayStr();
-  jget(\"data/stats.json\").then(j=>{ stats=j; if(VIEW===\"season\") renderSeason(); }).catch(()=>{});
+  jget("data/stats.json").then(j=>{ stats=j; if(VIEW==="season") renderSeason(); }).catch(()=>{});
   try{
-    const idx = await jget(\"data/index.json\");
+    const idx = await jget("data/index.json");
     DAYS = idx.days || [];
   }catch(e){ DAYS = []; }
   if(!DAYS.includes(todayStr())) DAYS.unshift(todayStr());
-  const hash = (location.hash || \"\").replace(\"#\", \"\");
+  const hash = (location.hash || "").replace("#", "");
   SEL = (hash && DAYS.includes(hash)) ? hash
       : (DAYS.includes(todayStr()) ? todayStr() : DAYS[0] || todayStr());
   await loadDay(SEL, quiet);
@@ -465,13 +465,13 @@ init();
 setInterval(watch, 60000);
 
 /* keep the last row clear of the fixed footer */
-const footerEl = document.querySelector(\"footer.actions\");
-function fitFooter(){ document.body.style.paddingBottom = (footerEl.offsetHeight + 20) + \"px\"; }
-window.addEventListener(\"resize\", fitFooter);
+const footerEl = document.querySelector("footer.actions");
+function fitFooter(){ document.body.style.paddingBottom = (footerEl.offsetHeight + 20) + "px"; }
+window.addEventListener("resize", fitFooter);
 if(window.ResizeObserver) new ResizeObserver(fitFooter).observe(footerEl);
 fitFooter();
 
-if(\"serviceWorker\" in navigator) navigator.serviceWorker.register(\"sw.js?v=\"+Date.now(), { updateViaCache: \"none\" }).catch(()=>{});
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js?v="+Date.now(), { updateViaCache: "none" }).catch(()=>{});
 </script>
 </body>
 </html>
