@@ -2642,6 +2642,14 @@
       "staked": 0.62,
       "returned": 1.55,
       "bank_after": 63.23
+    },
+    "2026-11-17": {
+      "picks": 0,
+      "lines": 0,
+      "won": 0,
+      "staked": 0.0,
+      "returned": 0.0,
+      "bank_after": 63.23
     }
   }
 }
