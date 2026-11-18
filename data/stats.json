@@ -22,24 +22,24 @@
   "season": {
     "days": 104,
     "picks": 193,
-    "lines": 239,
-    "won": 71,
+    "lines": 240,
+    "won": 72,
     "lost": 168,
     "nr": 112,
-    "staked": 120.62,
-    "returned": 173.85,
-    "bank": 63.23,
-    "roi": 44.1
+    "staked": 121.25,
+    "returned": 176.68,
+    "bank": 65.43,
+    "roi": 45.7
   },
   "by_size": [
     {
       "size": "Singles",
       "key": 1,
-      "lines": 152,
-      "won": 57,
-      "staked": 76.89,
-      "returned": 108.52,
-      "roi": 41.1
+      "lines": 153,
+      "won": 58,
+      "staked": 77.52,
+      "returned": 111.35,
+      "roi": 43.6
     },
     {
       "size": "Doubles",
@@ -71,7 +71,7 @@
     "2026-08": 1.78,
     "2026-09": 3.5,
     "2026-10": -1.2,
-    "2026-11": 8.68
+    "2026-11": 10.88
   },
   "best_day": {
     "date": "2026-11-06",
@@ -2654,10 +2654,10 @@
     "2026-11-18": {
       "picks": 1,
       "lines": 1,
-      "won": 0,
-      "staked": 0.0,
-      "returned": 0.0,
-      "bank_after": 63.23
+      "won": 1,
+      "staked": 0.63,
+      "returned": 2.83,
+      "bank_after": 65.43
     }
   }
 }
