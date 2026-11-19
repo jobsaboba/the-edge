@@ -20,8 +20,8 @@
     "all stats walk-forward — only the days BEFORE each runner count"
   ],
   "season": {
-    "days": 104,
-    "picks": 193,
+    "days": 105,
+    "picks": 194,
     "lines": 240,
     "won": 72,
     "lost": 168,
@@ -2657,6 +2657,14 @@
       "won": 1,
       "staked": 0.63,
       "returned": 2.83,
+      "bank_after": 65.43
+    },
+    "2026-11-19": {
+      "picks": 1,
+      "lines": 1,
+      "won": 0,
+      "staked": 0.0,
+      "returned": 0.0,
       "bank_after": 65.43
     }
   }
